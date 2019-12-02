@@ -48,6 +48,13 @@ public final class ClassUtil {
         return cls;
     }
 
+    /**
+     * 获取类的集合
+     *@author Garwen
+     *@date 2019/12/2 20:40
+     *@params [packageName]
+     *@return java.util.Set<java.lang.Class<?>>
+     */
     public static Set<Class<?>> getClassSet(String packageName){
         Set<Class<?>> classSet = new HashSet<Class<?>>();
         try {
@@ -86,6 +93,13 @@ public final class ClassUtil {
         return classSet;
     }
 
+    /**
+     *添加类至集合中
+     *@author Garwen
+     *@date 2019/12/2 20:41
+     *@params [classSet, packagePath, packageName]
+     *@return void
+     */
     public static void addClass(Set<Class<?>> classSet, String packagePath, String packageName){
         File[] files = new File(packagePath).listFiles(new FileFilter() {
             @Override
@@ -117,6 +131,13 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     *加载类，之后添加至集合中
+     *@author Garwen
+     *@date 2019/12/2 20:41
+     *@params [classSet, className]
+     *@return void
+     */
     private static void doAddClass(Set<Class<?>> classSet, String className){
         Class<?> cls = loadClass(className, false);
         classSet.add(cls);
