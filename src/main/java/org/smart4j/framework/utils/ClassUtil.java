@@ -49,6 +49,17 @@ public final class ClassUtil {
     }
 
     /**
+     *默认不初始化类
+     *@author Garwen
+     *@date 2019/12/4 0:10
+     *@params [className]
+     *@return java.lang.Class<?>
+     */
+    public static Class<?> loadClass(String className){
+        return loadClass(className, false);
+    }
+
+    /**
      * 获取类的集合
      *@author Garwen
      *@date 2019/12/2 20:40
