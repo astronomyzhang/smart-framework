@@ -59,7 +59,7 @@ public final class ReflectionUtil {
      *@params [value, field, obj]
      *@return void
      */
-    public static void setField(Object value, Field field, Object obj){
+    public static void setField(Object obj, Field field,Object value){
         try {
             field.setAccessible(true);
             field.set(obj, value);
