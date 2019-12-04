@@ -22,4 +22,22 @@ public final class StringUtil {
     public static boolean isNotEmpty(String str){
         return !isEmpty(str);
     }
+
+    /**
+     *切分字符串
+     *@author Garwen
+     *@date 2019/12/4 21:11
+     *@params [str, separator]
+     *@return java.lang.String[]
+     */
+    public static String[] splitString(String str, String separator){
+        String[] strs;
+        if(StringUtil.isNotEmpty(str)){
+            strs = StringUtils.split(str, separator);
+        }else{
+            strs=null;
+        }
+
+        return strs;
+    }
 }
