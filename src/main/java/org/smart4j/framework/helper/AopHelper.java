@@ -21,6 +21,7 @@ public final class AopHelper {
                 List<Proxy> proxyList = target.getValue();
 
                 Object proxy = ProxyManager.createProxy(targetClass, proxyList);
+                //将原有Bean通过设置修改为代理Bean
                 BeanHelper.setBean(targetClass, proxy);
             }
         } catch (Exception e) {
