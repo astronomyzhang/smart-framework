@@ -1,15 +1,34 @@
 package org.smart4j.framework.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smart4j.framework.annotation.Aspect;
 import org.smart4j.framework.proxy.AspectProxy;
+import org.smart4j.framework.proxy.Proxy;
+import org.smart4j.framework.proxy.ProxyManager;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public final class AopHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AopHelper.class);
+    static{
+        try {
+            Map<Class<?>, Set<Class<?>>> proxyMap = createProxyMap();
+            Map<Class<?>, List<Proxy>> targetMap = createTargetMap(proxyMap);
+            for(Map.Entry<Class<?>, List<Proxy>> target : targetMap.entrySet()){
+                Class<?> targetClass = target.getKey();
+                List<Proxy> proxyList = target.getValue();
+
+                Object proxy = ProxyManager.createProxy(targetClass, proxyList);
+                BeanHelper.setBean(targetClass, proxy);
+            }
+        } catch (Exception e) {
+            LOGGER.error("AOP Failure ", e);
+        }
+
+    }
+
     /**
      *获取Aspect中设置的注解类
      *@author Garwen
@@ -48,5 +67,31 @@ public final class AopHelper {
         }
 
         return proxyMap;
+    }
+
+    /**
+     * 获取目标类与代理对象之间的映射关系
+     *@author Garwen
+     *@date 2019/12/9 20:32
+     *@params [proxyMap]
+     *@return java.util.Map<java.lang.Class<?>,java.util.List<org.smart4j.framework.proxy.Proxy>>
+     */
+    private static Map<Class<?>, List<Proxy>> createTargetMap(Map<Class<?>, Set<Class<?>>> proxyMap) throws Exception{
+        Map<Class<?>, List<Proxy>> targetMap = new HashMap<Class<?>, List<Proxy>>();
+        for(Map.Entry<Class<?>, Set<Class<?>>> proxyEntry : proxyMap.entrySet()){
+            Class<?> proxyClass = proxyEntry.getKey();
+            Set<Class<?>> targetClassSet = proxyEntry.getValue();
+            for(Class<?> targetClass:targetClassSet){
+                Proxy proxy = (Proxy) targetClass.getDeclaredConstructor().newInstance();
+                if(targetMap.containsKey(targetClass)){
+                    targetMap.get(targetClass).add(proxy);
+                }else{
+                    List<Proxy> proxyList = new ArrayList<Proxy>();
+                    proxyList.add(proxy);
+                    targetMap.put(targetClass, proxyList);
+                }
+            }
+        }
+        return targetMap;
     }
 }

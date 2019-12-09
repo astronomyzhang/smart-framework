@@ -11,8 +11,13 @@ import org.smart4j.framework.utils.ClassUtil;
  */
 public class HelperLoader {
     public static void init(){
-        Class<?>[] classList={BeanHelper.class, ClassHelper.class, ConfigHelper.class, ControllerHelper.class,
-            IocHelper.class};
+        Class<?>[] classList={
+                BeanHelper.class,
+                ClassHelper.class,
+                ConfigHelper.class,
+                ControllerHelper.class,
+                AopHelper.class, //Aophelper加载需在IocHelper之前，否则代理对象通过依赖注入加载
+                IocHelper.class};
         for(Class<?> cls:classList){
             ClassUtil.loadClass(cls.getName());
         }
