@@ -3,6 +3,8 @@ package org.smart4j.framework.helper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smart4j.framework.annotation.Aspect;
+import org.smart4j.framework.annotation.Service;
+import org.smart4j.framework.annotation.Transaction;
 import org.smart4j.framework.proxy.AspectProxy;
 import org.smart4j.framework.proxy.Proxy;
 import org.smart4j.framework.proxy.ProxyManager;
@@ -27,7 +29,6 @@ public final class AopHelper {
         } catch (Exception e) {
             LOGGER.error("AOP Failure ", e);
         }
-
     }
 
     /**
@@ -58,6 +59,19 @@ public final class AopHelper {
     private static Map<Class<?>, Set<Class<?>>> createProxyMap() throws Exception{
         Map<Class<?>, Set<Class<?>>> proxyMap = new HashMap<Class<?>, Set<Class<?>>>();
 
+        addAspectProxy(proxyMap);
+        addTransactionProxy(proxyMap);
+        return proxyMap;
+    }
+
+    /**
+     * 向proxyMap中添加切面代理
+     *@author Garwen
+     *@date 2019/12/10 22:04
+     *@params [proxyMap]
+     *@return void
+     */
+    private static void addAspectProxy(Map<Class<?>, Set<Class<?>>> proxyMap) throws Exception{
         Set<Class<?>> proxyClassSet = ClassHelper.getClassSetBySuper(AspectProxy.class);
         for(Class<?> proxyClass : proxyClassSet){
             if(proxyClass.isAnnotationPresent(Aspect.class)){
@@ -66,8 +80,19 @@ public final class AopHelper {
                 proxyMap.put(proxyClass, targetClassSet);
             }
         }
+    }
 
-        return proxyMap;
+    /**
+     * 将Service注解类全部纳入事务管理中
+     *@author Garwen
+     *@date 2019/12/10 22:04
+     *@params [proxyMap]
+     *@return void
+     */
+    private static void addTransactionProxy(Map<Class<?>, Set<Class<?>>> proxyMap){
+        //Aspect注解对象是类，Transaction注解对象是方法
+        Set<Class<?>> proxyClassSet = ClassHelper.getClassSetByAnnotation(Service.class);
+        proxyMap.put(Transaction.class, proxyClassSet);
     }
 
     /**
@@ -83,7 +108,7 @@ public final class AopHelper {
             Class<?> proxyClass = proxyEntry.getKey();
             Set<Class<?>> targetClassSet = proxyEntry.getValue();
             for(Class<?> targetClass:targetClassSet){
-                Proxy proxy = (Proxy) targetClass.getDeclaredConstructor().newInstance();
+                Proxy proxy = (Proxy) proxyClass.getDeclaredConstructor().newInstance();
                 if(targetMap.containsKey(targetClass)){
                     targetMap.get(targetClass).add(proxy);
                 }else{
