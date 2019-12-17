@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
  * 字符串工具类
  */
 public final class StringUtil {
+    public static final String SEPARATOR = String.valueOf((char) 29);
+
     /**
      * 判断字符串是否为空
      */
