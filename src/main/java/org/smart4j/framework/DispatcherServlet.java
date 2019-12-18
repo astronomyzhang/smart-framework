@@ -43,40 +43,45 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //获取请求方法与请求路径
-        String requestMethod = req.getMethod();
-        String requestPath = req.getPathInfo();
+        ServletHelper.init(req, resp);
+        try {
+            //获取请求方法与请求路径
+            String requestMethod = req.getMethod();
+            String requestPath = req.getPathInfo();
 
-        if(requestPath.equals("/favicon.ico")){
-            return;
-        }
-
-        Handler handler = ControllerHelper.getHandler(requestMethod, requestPath);
-        if(handler != null){
-            Class<?> controllerClass = handler.getControllerClass();
-            Object controllerBean = BeanHelper.getBean(controllerClass);
-            //创建请求参数
-            Param param;
-            if(UploadHelper.isMultipart(req)){
-                param = UploadHelper.createParam(req);
-            }else{
-                param = RequestHelper.createParam(req);
+            if(requestPath.equals("/favicon.ico")){
+                return;
             }
 
-            Object result;
-            //调用Action方法
-            Method actionMethod = handler.getActionMethod();
-            if(param.isEmpty()){
-                result = ReflectionUtil.invokeMethod(controllerBean, actionMethod);
-            }else{
-                result = ReflectionUtil.invokeMethod(controllerBean, actionMethod, param);
+            Handler handler = ControllerHelper.getHandler(requestMethod, requestPath);
+            if(handler != null){
+                Class<?> controllerClass = handler.getControllerClass();
+                Object controllerBean = BeanHelper.getBean(controllerClass);
+                //创建请求参数
+                Param param;
+                if(UploadHelper.isMultipart(req)){
+                    param = UploadHelper.createParam(req);
+                }else{
+                    param = RequestHelper.createParam(req);
+                }
+
+                Object result;
+                //调用Action方法
+                Method actionMethod = handler.getActionMethod();
+                if(param.isEmpty()){
+                    result = ReflectionUtil.invokeMethod(controllerBean, actionMethod);
+                }else{
+                    result = ReflectionUtil.invokeMethod(controllerBean, actionMethod, param);
+                }
+                //处理Action方法返回值
+                if(result instanceof View){
+                    handleViewResult((View) result, req, resp);
+                }else if(result instanceof Data){
+                    handleDataResult((Data) result, resp);
+                }
             }
-            //处理Action方法返回值
-            if(result instanceof View){
-                handleViewResult((View) result, req, resp);
-            }else if(result instanceof Data){
-                handleDataResult((Data) result, resp);
-            }
+        } finally {
+            ServletHelper.destroy();
         }
 
     }
